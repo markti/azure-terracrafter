@@ -1,0 +1,6 @@
+**/.debug.sh
+**/.debug.pkrvars.hcl
+**/.DS_Store
+**/.terraform*
+**/terraform.tfstate*
+terraform/packer-tester/.debug.tfvars
