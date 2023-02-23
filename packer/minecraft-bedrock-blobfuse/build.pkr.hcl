@@ -53,6 +53,25 @@ build {
     inline = ["apt-get -y install cifs-utils"]
   }
 
+  # Used by BlobFuse
+  provisioner "shell" {
+    execute_command = local.execute_command
+    inline = ["apt-get -y install build-essential"]
+  }
+
+  # Install Blobfuse2
+  provisioner "shell" {
+    execute_command = local.execute_command
+    inline = [
+      "wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb",
+      "dpkg -i packages-microsoft-prod.deb",
+      "apt-get update",
+      "apt-get -y install libfuse3-dev fuse3",
+      "apt-get -y install blobfuse2"
+      ]
+  }
+
+  # required by Minecraft Bedrock
   provisioner "shell" {
     execute_command = local.execute_command
     inline = [
@@ -72,7 +91,7 @@ build {
       ]
   }
 
-  # Download latest version of Minecraft
+  # Download/Install latest version of Minecraft
   provisioner "shell" {
     execute_command = local.execute_command
     inline = [
@@ -84,72 +103,74 @@ build {
       ]
   }
 
+  # Minecraft start_server.sh
   provisioner "file" {
     source = "./files/start_server.sh"
     destination = "/tmp/start_server.sh"
   }
-
   provisioner "shell" {
     execute_command = local.execute_command
-    inline = ["cp /tmp/start_server.sh /home/mcserver/minecraft_bedrock/"]
-  }
-  
-  provisioner "shell" {
-    execute_command = local.execute_command
-    inline = ["chmod +x /home/mcserver/minecraft_bedrock/start_server.sh"]
+    inline = [
+      "cp /tmp/start_server.sh /home/mcserver/minecraft_bedrock/",
+      "chmod +x /home/mcserver/minecraft_bedrock/start_server.sh"
+    ]
   }
 
+  # Minecraft stop_server.sh
   provisioner "file" {
     source = "./files/stop_server.sh"
     destination = "/tmp/stop_server.sh"
   }
-
   provisioner "shell" {
     execute_command = local.execute_command
-    inline = ["cp /tmp/stop_server.sh /home/mcserver/minecraft_bedrock/"]
-  }
-  
-  provisioner "shell" {
-    execute_command = local.execute_command
-    inline = ["chmod +x /home/mcserver/minecraft_bedrock/stop_server.sh"]
+    inline = [
+      "cp /tmp/stop_server.sh /home/mcserver/minecraft_bedrock/",
+      "chmod +x /home/mcserver/minecraft_bedrock/stop_server.sh"
+    ]
   }
 
+  # Minecraft systemctl service
   provisioner "file" {
     source = "./files/mcbedrock.service"
     destination = "/tmp/mcbedrock.service"
   }
-
   provisioner "shell" {
     execute_command = local.execute_command
     inline = ["cp /tmp/mcbedrock.service /etc/systemd/system/"]
   }
 
-  provisioner "shell" {
-    execute_command = local.execute_command
-    inline = ["mkdir -p /mount/minecraft-fileshare"]
+  # Minecraft systemctl service environment config
+  provisioner "file" {
+    source = "./files/mcbedrock.conf"
+    destination = "/tmp/mcbedrock.conf"
   }
   provisioner "shell" {
     execute_command = local.execute_command
-    inline = ["mkdir -p /etc/smbcredentials"]
-  }
+    inline = [
+      "mkdir -p /etc/systemd/system/mcbedrock.service.d",
+      "cp /tmp/mcbedrock.conf /etc/systemd/system/mcbedrock.service.d/"
+      ]
+  }  
+
+  # Azure File Share Creds
   provisioner "file" {
     source = "./files/minecraft-fileshare.cred"
     destination = "/tmp/minecraft-fileshare.cred"
   }
   provisioner "shell" {
     execute_command = local.execute_command
-    inline = ["cp /tmp/minecraft-fileshare.cred /etc/smbcredentials/"]
+    inline = [
+      "mkdir -p /etc/smbcredentials",
+      "cp /tmp/minecraft-fileshare.cred /etc/smbcredentials/"
+    ]
   }
-  # 
-  provisioner "shell" {
-    execute_command = local.execute_command
-    inline = ["echo \"//STORAGE_ACCOUNT_NAME.file.core.windows.net/minecraft /mount/minecraft-fileshare cifs nofail,credentials=/etc/smbcredentials/minecraft-fileshare.cred,serverino,nosharesock,actimeo=30\" | tee -a /etc/fstab > /dev/null"]
-  }
+  
+  # Azure File Share /etc/fstab entry
   provisioner "shell" {
     execute_command = local.execute_command
     inline = [
-      "mkdir -p /home/mcserver/minecraft_bedrock/worlds",
-      "ln -s /mount/minecraft-fileshare /home/mcserver/minecraft_bedrock/worlds"
+      "mkdir -p /mount/minecraft-fileshare",
+      "echo \"//STORAGE_ACCOUNT_NAME.file.core.windows.net/minecraft /mount/minecraft-fileshare cifs nofail,credentials=/etc/smbcredentials/minecraft-fileshare.cred,serverino,nosharesock,actimeo=30\" | tee -a /etc/fstab > /dev/null"
     ]
   }
   
@@ -157,12 +178,6 @@ build {
     execute_command = local.execute_command
     inline = ["chown -R mcserver: /home/mcserver/"]
   }
-
-  /*
-  provisioner "shell" {
-    execute_command = local.execute_command
-    inline = ["systemctl enable mcbedrock"]
-  }*/
 
   provisioner "shell" {
     execute_command = local.execute_command

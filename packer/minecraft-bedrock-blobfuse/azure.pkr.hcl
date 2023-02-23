@@ -23,9 +23,9 @@ source azure-arm vm {
 
   communicator                      = "ssh"
   os_type                           = "Linux"
-  image_offer                       = "UbuntuServer"
-  image_publisher                   = "Canonical"
-  image_sku                         = "18.04-LTS"
+  image_publisher                   = "canonical"
+  image_offer                       = "0001-com-ubuntu-server-focal"
+  image_sku                         = "20_04-lts"
 
   vm_size                           = "Standard_DS2_v2"
 
