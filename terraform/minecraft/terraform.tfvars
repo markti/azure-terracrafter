@@ -1,0 +1,6 @@
+location               = "West US"
+gallery_name           = "galaztfmachineimagesdev"
+gallery_resource_group = "rg-aztf-machine-images-dev"
+image_name             = "minecraft-bedrock-local"
+image_version          = "2023.8.2"
+vm_size                = "Standard_D4s_v5"

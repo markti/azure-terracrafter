@@ -1,0 +1,26 @@
+name: Minecraft Local Storage
+
+on:
+  pull_request:
+    paths: 
+      - 'terraform/minecraft**'
+
+env:
+  WORKING_DIRECTORY: "terraform/minecraft"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Apply
+      env: 
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: |
+        terraform init
+        terraform apply -auto-approve
