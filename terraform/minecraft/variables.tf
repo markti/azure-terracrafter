@@ -1,19 +1,16 @@
 variable "location" {
   type = string
 }
-variable "name" {
+variable "gallery_name" {
   type = string
 }
-variable "resource_group_name" {
+variable "gallery_resource_group" {
   type = string
 }
-variable "subnet_id" {
+variable "image_name" {
   type = string
 }
-variable "vm_image_id" {
-  type = string
-}
-variable "ssh_public_key" {
+variable "image_version" {
   type = string
 }
 variable "vm_size" {

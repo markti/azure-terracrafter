@@ -1,12 +1,12 @@
 
-resource azurerm_public_ip main {
+resource "azurerm_public_ip" "main" {
   name                = "pip-vm${var.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
   allocation_method   = "Static"
 }
 
-resource azurerm_network_interface main {
+resource "azurerm_network_interface" "main" {
   name                = "nic-vm${var.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -19,11 +19,11 @@ resource azurerm_network_interface main {
   }
 }
 
-resource azurerm_linux_virtual_machine main {
+resource "azurerm_linux_virtual_machine" "main" {
   name                = "vm${var.name}"
   resource_group_name = var.resource_group_name
   location            = var.location
-  size                = "Standard_DS2_v2"
+  size                = var.vm_size
   admin_username      = "adminuser"
 
   network_interface_ids = [
